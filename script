@@ -1,0 +1,36 @@
+local NearestHead = nil
+local CurrentPlayer = game.Players.LocalPlayer
+CurrentPlayer.CharacterAdded:Wait()
+local Character = CurrentPlayer.Character
+local Head = Character:WaitForChild("Head")
+local Camera = game.Workspace.CurrentCamera
+Camera.CameraType = Enum.CameraType.Scriptable
+CurrentPlayer.CharacterAdded:Connect(function(char)
+    Character = char
+    Head = char:WaitForChild("Head")
+end)
+
+function GetNearestHead()
+    local NearestMag = 99999999999
+    local NearestHead = nil
+    for i, v in pairs(game.Workspace:GetDescendants()) do
+        if v:IsA("Humanoid") and v.Parent and v.Parent:IsA("Model") and v.Parent:FindFirstChild("Head") then
+            local vHead = v.Parent.Head
+            local Distance = math.abs((vHead.Position - Head.Position).Magnitude)
+            if Distance < NearestMag and vHead ~= Head then
+                NearestMag = Distance
+                NearestHead = vHead
+            end
+        end
+    end
+    return(NearestHead)
+end
+
+local RunService = game:GetService("RunService")
+
+RunService.Stepped:Connect(function()
+    local NH = GetNearestHead()
+    print(NH)
+    Camera.CFrame = CFrame.new(Head.Position)
+    Camera.CFrame = CFrame.new(Camera.CFrame.Position, NH.Position)
+end)
